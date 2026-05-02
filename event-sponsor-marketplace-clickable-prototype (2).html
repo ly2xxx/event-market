@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Event Sponsor Marketplace - Clickable MVP Prototype</title>
+  <style>
+    :root{
+      --bg:#0b0d12;
+      --panel:#111525;
+      --panel2:#0f1322;
+      --text:#e7e9ee;
+      --muted:#a7afc2;
+      --stroke:#222a41;
+      --brand:#7c5cff;
+      --brand2:#2ad4ff;
+      --good:#39d98a;
+      --warn:#ffcc66;
+      --bad:#ff5c7a;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --radius2:26px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--font); color:var(--text); background: radial-gradient(1200px 800px at 20% -10%, rgba(124,92,255,.25), transparent 55%),
+      radial-gradient(900px 700px at 100% 10%, rgba(42,212,255,.18), transparent 55%),
+      linear-gradient(180deg, var(--bg), #070810);
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .wrap{max-width:1120px; margin:0 auto; padding:22px 18px 64px;}
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px 16px; border:1px solid var(--stroke); background: rgba(17,21,37,.72);
+      backdrop-filter: blur(10px); border-radius: var(--radius2); box-shadow: var(--shadow);
+      position: sticky; top: 12px; z-index: 20;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
+    .logo{
+      width:36px; height:36px; border-radius:12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 10px 24px rgba(124,92,255,.25);
+    }
+    .title{display:flex; flex-direction:column; line-height:1.05}
+    .title b{font-size:14px; letter-spacing:.2px}
+    .title span{font-size:12px; color:var(--muted)}
+    .nav{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .chip{
+      border:1px solid var(--stroke); background: rgba(15,19,34,.8);
+      color:var(--muted); padding:9px 11px; border-radius: 999px;
+      font-size:12px; cursor:pointer; user-select:none;
+      transition: .15s ease;
+      text-decoration:none;
+    }
+    .chip:hover{transform: translateY(-1px); border-color:#2a355a; color:var(--text)}
+    .chip.active{background: rgba(124,92,255,.18); border-color: rgba(124,92,255,.5); color: var(--text)}
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .topbar{position:relative; top:auto}
+    }
+    .panel{
+      background: rgba(17,21,37,.78); border:1px solid var(--stroke); border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding:14px 16px; border-bottom:1px solid var(--stroke);
+      display:flex; align-items:center; justify-content:space-between;
+      background: linear-gradient(180deg, rgba(124,92,255,.10), transparent);
+    }
+    .panelHeader h2{
+      margin:0; font-size:13px; letter-spacing:.2px;
+    }
+    .panelHeader small{color:var(--muted); font-size:12px}
+    .panelBody{padding:14px 16px}
+    .kpiRow{display:flex; gap:10px; flex-wrap:wrap}
+    .kpi{
+      flex:1; min-width: 150px;
+      border:1px solid var(--stroke); background: rgba(15,19,34,.85);
+      border-radius: 16px; padding:12px; box-shadow: 0 10px 26px rgba(0,0,0,.18);
+    }
+    .kpi .label{font-size:12px; color:var(--muted)}
+    .kpi .val{font-size:18px; font-weight:700; margin-top:6px}
+    .hint{
+      margin-top:10px; color:var(--muted); font-size:12px; line-height:1.45;
+    }
+    .btnRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    button, .btn{
+      border:0; border-radius: 16px; padding:11px 12px;
+      background: rgba(15,19,34,.92); color: var(--text);
+      border:1px solid var(--stroke);
+      cursor:pointer; transition:.15s ease;
+      font-weight:600; font-size:13px;
+      text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    button:hover, .btn:hover{transform: translateY(-1px); border-color:#2a355a}
+    .primary{background: linear-gradient(135deg, rgba(124,92,255,.9), rgba(42,212,255,.55)); border-color: transparent}
+    .good{background: rgba(57,217,138,.12); border-color: rgba(57,217,138,.35)}
+    .warn{background: rgba(255,204,102,.12); border-color: rgba(255,204,102,.35)}
+    .bad{background: rgba(255,92,122,.10); border-color: rgba(255,92,122,.35)}
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .card{
+      border:1px solid var(--stroke); background: rgba(15,19,34,.85);
+      border-radius: var(--radius); padding:12px; box-shadow: 0 10px 26px rgba(0,0,0,.18);
+    }
+    .cardTop{display:flex; justify-content:space-between; gap:10px}
+    .cardTitle{font-weight:800; font-size:14px}
+    .meta{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.3}
+    .pillRow{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .pill{font-size:11px; color:var(--muted); border:1px solid var(--stroke); padding:6px 8px; border-radius: 999px; background: rgba(11,13,18,.4)}
+    .split{
+      display:grid; grid-template-columns: 1fr 1fr; gap:12px;
+    }
+    @media (max-width: 680px){.split{grid-template-columns:1fr}}
+    .field{display:flex; flex-direction:column; gap:7px; margin-top:10px}
+    label{font-size:12px; color:var(--muted)}
+    input, select, textarea{
+      width:100%;
+      background: rgba(11,13,18,.55);
+      color: var(--text);
+      border:1px solid var(--stroke);
+      border-radius: 14px;
+      padding:10px 11px;
+      outline:none;
+    }
+    textarea{min-height:86px; resize:vertical}
+    .screen{display:none}
+    .screen.active{display:block}
+    .toast{
+      position: fixed; right: 16px; bottom: 16px;
+      background: rgba(17,21,37,.9); border:1px solid var(--stroke);
+      padding:12px 14px; border-radius: 16px; box-shadow: var(--shadow);
+      max-width: 360px; display:none;
+    }
+    .toast.show{display:block}
+    .toast b{display:block; font-size:13px}
+    .toast span{display:block; color:var(--muted); font-size:12px; margin-top:4px; line-height:1.35}
+    .divider{height:1px; background: var(--stroke); margin:12px 0}
+    .tiny{font-size:11px; color:var(--muted)}
+    .tag{
+      font-size:11px; font-weight:700;
+      padding:6px 9px; border-radius:999px;
+      background: rgba(124,92,255,.16); border:1px solid rgba(124,92,255,.35);
+    }
+    .rightHeader{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      padding: 0 0 8px 0;
+    }
+    .searchbar{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%;
+    }
+    .searchbar input{flex: 1}
+    .ghost{
+      background: transparent; border:1px dashed rgba(124,92,255,.45); color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <b>Event Sponsor Marketplace</b>
+          <span>Clickable MVP prototype (static)</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="chip" href="#home" data-nav="home">Home</a>
+        <a class="chip" href="#organiser" data-nav="organiser">Organiser</a>
+        <a class="chip" href="#sponsor" data-nav="sponsor">Sponsor</a>
+        <a class="chip" href="#deal" data-nav="deal">Deal</a>
+        <a class="chip" href="#admin" data-nav="admin">Admin</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="panel">
+        <div class="panelHeader">
+          <h2 id="leftTitle">Quick actions</h2>
+          <small id="leftSub">Click around</small>
+        </div>
+        <div class="panelBody" id="leftBody">
+          <div class="kpiRow">
+            <div class="kpi">
+              <div class="label">Events live</div>
+              <div class="val" id="kpiEvents">6</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Sponsor leads</div>
+              <div class="val" id="kpiLeads">12</div>
+            </div>
+          </div>
+          <div class="hint">
+            This is a <b>clickable wireframe</b> (no backend). You're testing the flow: organiser lists an event, sponsor sends offer, organiser accepts.
+          </div>
+          <div class="btnRow">
+            <button class="primary" id="btnCreateEvent">+ Create event</button>
+            <button class="good" id="btnBrowseEvents">Browse events</button>
+            <button class="warn" id="btnMakeOffer">Make offer</button>
+          </div>
+          <div class="divider"></div>
+          <div class="tiny">
+            Tip: use the top pills to jump screens. Everything is fake data but feels real.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: SCREENS -->
+      <div class="panel">
+        <div class="panelHeader">
+          <h2 id="screenTitle">Home</h2>
+          <small id="screenSub">MVP flow demo</small>
+        </div>
+        <div class="panelBody">
+
+          <!-- HOME -->
+          <section class="screen active" id="screen-home">
+            <div class="rightHeader">
+              <div>
+                <div class="tag">Goal</div>
+                <div class="meta" style="margin-top:8px">
+                  Match <b>events</b> with <b>sponsors</b> without IG DMs + WhatsApp chaos.
+                </div>
+              </div>
+            </div>
+
+            <div class="split" style="margin-top:14px">
+              <div class="card">
+                <div class="cardTop">
+                  <div>
+                    <div class="cardTitle">I'm an Organiser</div>
+                    <div class="meta">List your event + packages, receive sponsor offers, accept deals.</div>
+                  </div>
+                </div>
+                <div class="btnRow" style="margin-top:12px">
+                  <a class="btn primary" href="#organiser">Go to Organiser</a>
+                  <button class="btn ghost" data-action="seedOrganiser">Load demo event</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="cardTop">
+                  <div>
+                    <div class="cardTitle">I'm a Sponsor</div>
+                    <div class="meta">Filter events, view packages, send an offer in 30 seconds.</div>
+                  </div>
+                </div>
+                <div class="btnRow" style="margin-top:12px">
+                  <a class="btn primary" href="#sponsor">Go to Sponsor</a>
+                  <button class="btn ghost" data-action="seedSponsor">Load demo brand</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="card">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle">What's inside this prototype</div>
+                  <div class="meta">Minimal, but end-to-end clickable.</div>
+                </div>
+              </div>
+              <div class="pillRow">
+                <span class="pill">Create event</span>
+                <span class="pill">Add packages</span>
+                <span class="pill">Browse events + filters</span>
+                <span class="pill">Send offer</span>
+                <span class="pill">Accept deal</span>
+                <span class="pill">Admin approve</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ORGANISER -->
+          <section class="screen" id="screen-organiser">
+            <div class="rightHeader">
+              <div>
+                <div class="cardTitle">Create / manage an event</div>
+                <div class="meta">Fill the basics. Save. Add packages. Done.</div>
+              </div>
+              <div class="btnRow" style="margin:0">
+                <button class="btn" data-action="viewInbox">Inbox (2)</button>
+                <button class="btn bad" data-action="resetAll">Reset demo</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="split">
+                <div class="field">
+                  <label>Event name</label>
+                  <input id="evtName" placeholder="e.g., Afro Vibes Night" />
+                </div>
+                <div class="field">
+                  <label>City</label>
+                  <input id="evtCity" placeholder="e.g., Glasgow" />
+                </div>
+              </div>
+
+              <div class="split">
+                <div class="field">
+                  <label>Date</label>
+                  <input id="evtDate" type="date" />
+                </div>
+                <div class="field">
+                  <label>Audience size</label>
+                  <select id="evtSize">
+                    <option value="100-200">100-200</option>
+                    <option value="200-500" selected>200-500</option>
+                    <option value="500-1000">500-1000</option>
+                    <option value="1000+">1000+</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Vibe / type</label>
+                <select id="evtType">
+                  <option>Afrobeats</option>
+                  <option>Amapiano</option>
+                  <option>Culture / Community</option>
+                  <option>Corporate</option>
+                  <option>Festival</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Quick pitch</label>
+                <textarea id="evtPitch" placeholder="Why should a sponsor care? Who's attending? What's the vibe?"></textarea>
+              </div>
+
+              <div class="btnRow">
+                <button class="primary" data-action="saveEvent">Save event</button>
+                <button class="good" data-action="openPackages">Add packages</button>
+                <a class="btn" href="#sponsor">Preview as sponsor</a>
+              </div>
+
+              <div class="hint">Once saved, it appears in the sponsor browse list (fake data, but the flow is real).</div>
+            </div>
+
+            <div class="card" id="packagesCard" style="display:none">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle">Sponsorship packages</div>
+                  <div class="meta">Give sponsors clear tiers. Less negotiation. More deals.</div>
+                </div>
+              </div>
+
+              <div class="split" style="margin-top:10px">
+                <div class="card">
+                  <div class="cardTitle">Bronze - £250</div>
+                  <div class="meta">Logo on flyer + 1 IG story mention</div>
+                  <div class="btnRow"><button class="btn good" data-action="selectPackage" data-package="Bronze">Use</button></div>
+                </div>
+                <div class="card">
+                  <div class="cardTitle">Silver - £500</div>
+                  <div class="meta">Logo + MC shoutout + 1 post tag</div>
+                  <div class="btnRow"><button class="btn good" data-action="selectPackage" data-package="Silver">Use</button></div>
+                </div>
+              </div>
+
+              <div class="split" style="margin-top:12px">
+                <div class="card">
+                  <div class="cardTitle">Gold - £1,000</div>
+                  <div class="meta">Booth + content bundle + headline mention</div>
+                  <div class="btnRow"><button class="btn good" data-action="selectPackage" data-package="Gold">Use</button></div>
+                </div>
+                <div class="card">
+                  <div class="cardTitle">Custom</div>
+                  <div class="meta">You want something spicy? Write it.</div>
+                  <div class="field" style="margin-top:10px">
+                    <label>Custom package text</label>
+                    <input id="customPkg" placeholder="e.g., Drinks partnership + branded cups" />
+                  </div>
+                  <div class="btnRow"><button class="btn good" data-action="selectPackage" data-package="Custom">Use</button></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" id="inboxCard" style="display:none">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle">Inbox</div>
+                  <div class="meta">Sponsor enquiries land here.</div>
+                </div>
+              </div>
+              <div class="list" style="margin-top:10px" id="inboxList"></div>
+            </div>
+          </section>
+
+          <!-- SPONSOR -->
+          <section class="screen" id="screen-sponsor">
+            <div class="rightHeader">
+              <div>
+                <div class="cardTitle">Browse events</div>
+                <div class="meta">Filters are the whole point. Find the right crowd fast.</div>
+              </div>
+              <div class="btnRow" style="margin:0">
+                <button class="btn" data-action="openBrand">Brand profile</button>
+                <button class="btn warn" data-action="viewCart">My offers (1)</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="searchbar">
+                <input id="filterCity" placeholder="Filter by city (e.g., Glasgow)" />
+                <select id="filterType">
+                  <option value="">All types</option>
+                  <option>Afrobeats</option>
+                  <option>Amapiano</option>
+                  <option>Culture / Community</option>
+                  <option>Corporate</option>
+                  <option>Festival</option>
+                </select>
+                <select id="filterSize">
+                  <option value="">Any size</option>
+                  <option>100-200</option>
+                  <option>200-500</option>
+                  <option>500-1000</option>
+                  <option>1000+</option>
+                </select>
+                <button class="primary" data-action="applyFilters">Apply</button>
+              </div>
+              <div class="hint">Click an event to view packages + send offer.</div>
+            </div>
+
+            <div class="list" id="eventList" style="margin-top:12px"></div>
+
+            <div class="card" id="brandCard" style="display:none; margin-top:12px">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle">Brand profile</div>
+                  <div class="meta">Just enough info to match you correctly.</div>
+                </div>
+              </div>
+              <div class="split" style="margin-top:10px">
+                <div class="field">
+                  <label>Brand name</label>
+                  <input id="brandName" placeholder="e.g., Red Bull" />
+                </div>
+                <div class="field">
+                  <label>Budget range</label>
+                  <select id="brandBudget">
+                    <option>£100-£300</option>
+                    <option selected>£300-£1,000</option>
+                    <option>£1,000-£5,000</option>
+                    <option>£5,000+</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Industry</label>
+                <input id="brandIndustry" placeholder="e.g., Beverage, Fashion, Tech" />
+              </div>
+              <div class="btnRow">
+                <button class="good" data-action="saveBrand">Save brand</button>
+                <button class="btn" data-action="closeBrand">Close</button>
+              </div>
+            </div>
+
+            <div class="card" id="offersCard" style="display:none; margin-top:12px">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle">My offers</div>
+                  <div class="meta">Offers you've sent (demo).</div>
+                </div>
+              </div>
+              <div class="list" id="offersList" style="margin-top:10px"></div>
+              <div class="btnRow">
+                <a class="btn primary" href="#deal">Go to Deal view</a>
+                <button class="btn" data-action="closeOffers">Close</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- DEAL -->
+          <section class="screen" id="screen-deal">
+            <div class="rightHeader">
+              <div>
+                <div class="cardTitle">Deal</div>
+                <div class="meta">Sponsor sends offer -> organiser accepts -> deal confirmed.</div>
+              </div>
+              <div class="btnRow" style="margin:0">
+                <button class="btn good" data-action="markAccepted">Accept deal</button>
+                <button class="btn warn" data-action="markPending">Set pending</button>
+                <button class="btn bad" data-action="markDeclined">Decline</button>
+              </div>
+            </div>
+
+            <div class="card" id="dealCard">
+              <div class="cardTop">
+                <div>
+                  <div class="cardTitle" id="dealTitle">Afro Vibes Night x Pulse Drinks</div>
+                  <div class="meta" id="dealMeta">Package: Silver - £500 • City: Glasgow • Audience: 200-500</div>
+                </div>
+                <div class="tag" id="dealStatus">PENDING</div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="split">
+                <div class="card">
+                  <div class="cardTitle">What sponsor gets</div>
+                  <div class="meta" id="dealBenefits">Logo on flyer • MC shoutout • 1 post tag</div>
+                </div>
+                <div class="card">
+                  <div class="cardTitle">What organiser needs</div>
+                  <div class="meta">Payment confirmed + deliverables agreed (basic contract later).</div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label>Notes (shared)</label>
+                <textarea id="dealNotes" placeholder="Add logistics, assets deadline, booth size, etc."></textarea>
+              </div>
+
+              <div class="btnRow">
+                <button class="primary" data-action="saveDealNotes">Save notes</button>
+                <a class="btn" href="#admin">View in Admin</a>
+              </div>
+
+              <div class="hint">MVP version: deal acceptance triggers a confirmation email + invoice (later).</div>
+            </div>
+          </section>
+
+          <!-- ADMIN -->
+          <section class="screen" id="screen-admin">
+            <div class="rightHeader">
+              <div>
+                <div class="cardTitle">Admin</div>
+                <div class="meta">Approve listings, kill spam, monitor deals.</div>
+              </div>
+              <div class="btnRow" style="margin:0">
+                <button class="btn good" data-action="approveAll">Approve all</button>
+                <button class="btn bad" data-action="flagSpam">Flag spam</button>
+              </div>
+            </div>
+
+            <div class="split" style="margin-top:10px">
+              <div class="card">
+                <div class="cardTop">
+                  <div>
+                    <div class="cardTitle">Pending approvals</div>
+                    <div class="meta">Events / Sponsors waiting for review.</div>
+                  </div>
+                </div>
+                <div class="list" style="margin-top:10px" id="adminApprovals"></div>
+              </div>
+
+              <div class="card">
+                <div class="cardTop">
+                  <div>
+                    <div class="cardTitle">Deals activity</div>
+                    <div class="meta">Quick view of the pipeline.</div>
+                  </div>
+                </div>
+                <div class="list" style="margin-top:10px" id="adminDeals"></div>
+              </div>
+            </div>
+
+            <div class="hint">Admin is basic on purpose. You can ship this fast.</div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <b id="toastTitle">Saved</b>
+    <span id="toastMsg">Done.</span>
+  </div>
+
+  <script>
+    const state = {
+      event: {
+        name: "Afro Vibes Night",
+        city: "Glasgow",
+        date: "",
+        size: "200-500",
+        type: "Afrobeats",
+        pitch: "High-energy Afro night. 70% students + young professionals. Heavy IG content.",
+        packages: ["Bronze", "Silver", "Gold"]
+      },
+      brand: {
+        name: "Pulse Drinks",
+        budget: "£300-£1,000",
+        industry: "Beverage"
+      },
+      selectedPackage: "Silver",
+      offers: [
+        { id: "off_1", event: "Afro Vibes Night", sponsor: "Pulse Drinks", package: "Silver", amount: 500, status: "SENT" }
+      ],
+      inbox: [
+        { id: "msg_1", from: "Pulse Drinks", about: "Afro Vibes Night", package: "Silver", amount: 500, note: "We can sponsor + provide free cans for VIP." },
+        { id: "msg_2", from: "Streetwear Co", about: "Afro Vibes Night", package: "Bronze", amount: 250, note: "Logo + giveaway collab?" }
+      ],
+      deal: { status: "PENDING", notes: "" },
+      approvals: [
+        { id: "ap_1", type: "Event", name: "Afro Vibes Night", status: "PENDING" },
+        { id: "ap_2", type: "Sponsor", name: "Pulse Drinks", status: "PENDING" }
+      ]
+    };
+
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => [...document.querySelectorAll(sel)];
+    function toast(title, msg){
+      $("#toastTitle").textContent = title;
+      $("#toastMsg").textContent = msg;
+      const t = $("#toast");
+      t.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 2400);
+    }
+
+    function setActiveScreen(route){
+      const screenMap = {
+        home: { title: "Home", sub: "MVP flow demo" },
+        organiser: { title: "Organiser", sub: "Create event + packages" },
+        sponsor: { title: "Sponsor", sub: "Browse + send offer" },
+        deal: { title: "Deal", sub: "Accept / pending / decline" },
+        admin: { title: "Admin", sub: "Approve + monitor" }
+      };
+      const key = screenMap[route] ? route : "home";
+      $$(".screen").forEach(s => s.classList.remove("active"));
+      $("#screen-" + key).classList.add("active");
+
+      $("#screenTitle").textContent = screenMap[key].title;
+      $("#screenSub").textContent = screenMap[key].sub;
+
+      $$(".chip").forEach(c => c.classList.toggle("active", c.dataset.nav === key));
+
+      const leftTitles = {
+        home: ["Quick actions", "Pick a role"],
+        organiser: ["Organiser actions", "Build your listing"],
+        sponsor: ["Sponsor actions", "Filter + offer"],
+        deal: ["Deal actions", "Confirm the bag"],
+        admin: ["Admin actions", "Keep it clean"]
+      };
+      $("#leftTitle").textContent = leftTitles[key][0];
+      $("#leftSub").textContent = leftTitles[key][1];
+
+      renderEventList();
+      renderInbox();
+      renderOffers();
+      renderDeal();
+      renderAdmin();
+    }
+
+    window.addEventListener("hashchange", () => {
+      setActiveScreen((location.hash || "#home").slice(1));
+    });
+
+    function renderEventList(){
+      const list = $("#eventList");
+      if(!list) return;
+      list.innerHTML = "";
+
+      const city = ($("#filterCity")?.value || "").trim().toLowerCase();
+      const type = $("#filterType")?.value || "";
+      const size = $("#filterSize")?.value || "";
+
+      const catalogue = [
+        { id:"e1", name: state.event.name, city: state.event.city, type: state.event.type, size: state.event.size, date: state.event.date || "TBA", pitch: state.event.pitch },
+        { id:"e2", name:"Amapiano Terrace", city:"Edinburgh", type:"Amapiano", size:"100-200", date:"TBA", pitch:"Sunset terrace vibe + content-heavy crowd." },
+        { id:"e3", name:"Culture & Community Market", city:"Glasgow", type:"Culture / Community", size:"500-1000", date:"TBA", pitch:"Family friendly, diaspora brands, strong community presence." },
+        { id:"e4", name:"Corporate Afterhours", city:"London", type:"Corporate", size:"200-500", date:"TBA", pitch:"Young professionals, high spending power." },
+      ];
+
+      const filtered = catalogue.filter(e => {
+        if(city && !e.city.toLowerCase().includes(city)) return false;
+        if(type && e.type !== type) return false;
+        if(size && e.size !== size) return false;
+        return true;
+      });
+
+      if(filtered.length === 0){
+        list.innerHTML = `<div class="card"><div class="cardTitle">No matches</div><div class="meta">Try removing a filter.</div></div>`;
+        return;
+      }
+
+      filtered.forEach(e => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">${e.name}</div>
+              <div class="meta">${e.city} • ${e.type} • Audience ${e.size} • Date: ${e.date}</div>
+            </div>
+            <button class="btn primary" data-action="openEvent" data-id="${e.id}">View</button>
+          </div>
+          <div class="meta" style="margin-top:10px">${e.pitch}</div>
+          <div class="pillRow">
+            <span class="pill">Packages: ${state.event.packages.join(", ")}</span>
+          </div>
+          <div class="btnRow" style="margin-top:10px">
+            <button class="btn warn" data-action="sendOffer" data-id="${e.id}">Send offer</button>
+            <a class="btn" href="#deal">Go to deal</a>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    function renderInbox(){
+      const inbox = $("#inboxList");
+      if(!inbox) return;
+      inbox.innerHTML = "";
+      state.inbox.forEach(m => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">${m.from}</div>
+              <div class="meta">About: ${m.about} • Package: ${m.package} • Offer: £${m.amount}</div>
+            </div>
+            <a class="btn primary" href="#deal" data-action="openDealFromInbox" data-id="${m.id}">Open deal</a>
+          </div>
+          <div class="meta" style="margin-top:10px">${m.note}</div>
+        `;
+        inbox.appendChild(el);
+      });
+    }
+
+    function renderOffers(){
+      const offers = $("#offersList");
+      if(!offers) return;
+      offers.innerHTML = "";
+      state.offers.forEach(o => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">${o.event}</div>
+              <div class="meta">Sponsor: ${o.sponsor} • Package: ${o.package} • £${o.amount} • Status: ${o.status}</div>
+            </div>
+            <a class="btn" href="#deal">View</a>
+          </div>
+        `;
+        offers.appendChild(el);
+      });
+    }
+
+    function pkgPrice(pkg){
+      if(pkg === "Bronze") return 250;
+      if(pkg === "Silver") return 500;
+      if(pkg === "Gold") return 1000;
+      return 750;
+    }
+    function pkgBenefits(pkg){
+      if(pkg === "Bronze") return "Logo on flyer • 1 IG story mention";
+      if(pkg === "Silver") return "Logo on flyer • MC shoutout • 1 post tag";
+      if(pkg === "Gold") return "Booth • content bundle • headline mention";
+      return "Custom deliverables (as agreed)";
+    }
+
+    function renderDeal(){
+      if(!$("#dealTitle")) return;
+      $("#dealTitle").textContent = `${state.event.name} x ${state.brand.name}`;
+      $("#dealMeta").textContent = `Package: ${state.selectedPackage} - £${pkgPrice(state.selectedPackage)} • City: ${state.event.city} • Audience: ${state.event.size}`;
+      $("#dealBenefits").textContent = pkgBenefits(state.selectedPackage);
+      $("#dealStatus").textContent = state.deal.status;
+
+      const node = $("#dealStatus");
+      const isA = state.deal.status === "ACCEPTED";
+      const isD = state.deal.status === "DECLINED";
+      node.style.background = isA ? "rgba(57,217,138,.16)" : isD ? "rgba(255,92,122,.14)" : "rgba(255,204,102,.14)";
+      node.style.border = isA ? "1px solid rgba(57,217,138,.35)" : isD ? "1px solid rgba(255,92,122,.35)" : "1px solid rgba(255,204,102,.35)";
+    }
+
+    function renderAdmin(){
+      const approvals = $("#adminApprovals");
+      const deals = $("#adminDeals");
+      if(!approvals || !deals) return;
+
+      approvals.innerHTML = "";
+      state.approvals.forEach(a => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">${a.type}: ${a.name}</div>
+              <div class="meta">Status: ${a.status}</div>
+            </div>
+            <button class="btn good" data-action="approveOne" data-id="${a.id}">Approve</button>
+          </div>
+        `;
+        approvals.appendChild(el);
+      });
+
+      deals.innerHTML = "";
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="cardTop">
+          <div>
+            <div class="cardTitle">${state.event.name} x ${state.brand.name}</div>
+            <div class="meta">Package: ${state.selectedPackage} • Status: ${state.deal.status}</div>
+          </div>
+          <a class="btn primary" href="#deal">Open</a>
+        </div>
+      `;
+      deals.appendChild(el);
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if(!btn) return;
+
+      const action = btn.dataset.action;
+
+      if(action === "seedOrganiser"){
+        $("#evtName").value = state.event.name;
+        $("#evtCity").value = state.event.city;
+        $("#evtSize").value = state.event.size;
+        $("#evtType").value = state.event.type;
+        $("#evtPitch").value = state.event.pitch;
+        toast("Loaded", "Demo event filled in.");
+        location.hash = "#organiser";
+      }
+
+      if(action === "seedSponsor"){
+        $("#brandName").value = state.brand.name;
+        $("#brandBudget").value = state.brand.budget;
+        $("#brandIndustry").value = state.brand.industry;
+        toast("Loaded", "Demo brand filled in.");
+        location.hash = "#sponsor";
+        $("#brandCard").style.display = "block";
+      }
+
+      if(action === "saveEvent"){
+        state.event.name = ($("#evtName").value || "Untitled Event").trim();
+        state.event.city = ($("#evtCity").value || "Unknown").trim();
+        state.event.date = ($("#evtDate").value || "");
+        state.event.size = $("#evtSize").value;
+        state.event.type = $("#evtType").value;
+        state.event.pitch = ($("#evtPitch").value || "").trim() || "No pitch yet.";
+        toast("Saved", "Event listing updated.");
+        renderEventList();
+        renderDeal();
+        renderAdmin();
+      }
+
+      if(action === "openPackages"){
+        $("#packagesCard").style.display = "block";
+        toast("Packages", "Pick a tier (Bronze/Silver/Gold/Custom).");
+      }
+
+      if(action === "selectPackage"){
+        state.selectedPackage = btn.dataset.package;
+        toast("Selected", `Package set to ${state.selectedPackage}.`);
+        renderDeal();
+        renderAdmin();
+      }
+
+      if(action === "viewInbox"){
+        $("#inboxCard").style.display = "block";
+        toast("Inbox", "These are sponsor enquiries (demo).");
+      }
+
+      if(action === "applyFilters"){
+        renderEventList();
+        toast("Filtered", "Showing matching events.");
+      }
+
+      if(action === "openEvent"){
+        toast("Event opened", "Send an offer from this card (demo).");
+        $("#brandCard").style.display = "block";
+      }
+
+      if(action === "sendOffer"){
+        // create a new offer
+        const amount = pkgPrice(state.selectedPackage);
+        state.offers.unshift({
+          id: "off_" + Math.random().toString(16).slice(2,7),
+          event: state.event.name,
+          sponsor: state.brand.name,
+          package: state.selectedPackage,
+          amount,
+          status: "SENT"
+        });
+        toast("Offer sent", `Sent ${state.selectedPackage} offer for £${amount}.`);
+        renderOffers();
+        $("#offersCard").style.display = "block";
+      }
+
+      if(action === "openBrand"){
+        $("#brandCard").style.display = "block";
+      }
+      if(action === "closeBrand"){
+        $("#brandCard").style.display = "none";
+      }
+      if(action === "saveBrand"){
+        state.brand.name = ($("#brandName").value || "Unnamed Brand").trim();
+        state.brand.budget = $("#brandBudget").value;
+        state.brand.industry = ($("#brandIndustry").value || "").trim() || "Unknown";
+        toast("Saved", "Brand profile updated.");
+        renderDeal();
+        renderAdmin();
+        renderOffers();
+      }
+
+      if(action === "viewCart"){
+        $("#offersCard").style.display = "block";
+        toast("Offers", "Your sent offers (demo).");
+      }
+      if(action === "closeOffers"){
+        $("#offersCard").style.display = "none";
+      }
+
+      if(action === "openDealFromInbox"){
+        const id = btn.dataset.id;
+        const msg = state.inbox.find(x => x.id === id);
+        if(msg){
+          state.brand.name = msg.from;
+          state.selectedPackage = msg.package;
+          state.deal.status = "PENDING";
+          toast("Deal opened", "Ready to accept / decline.");
+          renderDeal();
+          renderAdmin();
+        }
+      }
+
+      if(action === "markAccepted"){
+        state.deal.status = "ACCEPTED";
+        toast("Accepted", "Deal confirmed (demo).");
+        renderDeal(); renderAdmin();
+      }
+      if(action === "markPending"){
+        state.deal.status = "PENDING";
+        toast("Pending", "Deal set to pending.");
+        renderDeal(); renderAdmin();
+      }
+      if(action === "markDeclined"){
+        state.deal.status = "DECLINED";
+        toast("Declined", "Deal declined.");
+        renderDeal(); renderAdmin();
+      }
+
+      if(action === "saveDealNotes"){
+        state.deal.notes = ($("#dealNotes").value || "").trim();
+        toast("Saved", "Deal notes updated.");
+      }
+
+      if(action === "approveOne"){
+        const id = btn.dataset.id;
+        const item = state.approvals.find(a => a.id === id);
+        if(item){
+          item.status = "APPROVED";
+          toast("Approved", `${item.type} approved.`);
+          renderAdmin();
+        }
+      }
+      if(action === "approveAll"){
+        state.approvals.forEach(a => a.status = "APPROVED");
+        toast("Approved", "All approvals cleared.");
+        renderAdmin();
+      }
+      if(action === "flagSpam"){
+        toast("Flagged", "Spam flagged (demo).");
+      }
+
+      if(action === "resetAll"){
+        location.reload();
+      }
+    });
+
+    $("#btnCreateEvent").addEventListener("click", ()=> location.hash = "#organiser");
+    $("#btnBrowseEvents").addEventListener("click", ()=> location.hash = "#sponsor");
+    $("#btnMakeOffer").addEventListener("click", ()=>{
+      location.hash = "#deal";
+      toast("Offer", "You're in the deal view now.");
+    });
+
+    setActiveScreen((location.hash || "#home").slice(1));
+
+    setTimeout(()=>{
+      if($("#evtName")){
+        $("#evtName").value = state.event.name;
+        $("#evtCity").value = state.event.city;
+        $("#evtSize").value = state.event.size;
+        $("#evtType").value = state.event.type;
+        $("#evtPitch").value = state.event.pitch;
+      }
+      if($("#brandName")){
+        $("#brandName").value = state.brand.name;
+        $("#brandBudget").value = state.brand.budget;
+        $("#brandIndustry").value = state.brand.industry;
+      }
+    }, 10);
+  </script>
+</body>
+</html>

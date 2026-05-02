@@ -1,0 +1,11 @@
+[project]
+name = "event-sponsor-marketplace"
+version = "0.1.0"
+description = "Event Sponsor Marketplace - Streamlit MVP demo"
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit>=1.35.0",
+]
+
+[tool.uv]
+dev-dependencies = []
