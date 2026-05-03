@@ -1,22 +1,26 @@
-# Event Sponsor Marketplace — Streamlit MVP
+# Event Sponsor Marketplace
 
-A streamlined marketplace designed to connect event organisers with brand sponsors, replacing the fragmented "WhatsApp and IG DM chaos" with a structured, professional platform. This MVP provides an end-to-end clickable journey from listing an event to closing a sponsorship deal.
+A streamlined marketplace designed to connect event organisers with brand sponsors, replacing the fragmented "WhatsApp and IG DM chaos" with a structured, professional platform. End-to-end flow: list event → receive offer → accept → message → exchange assets → close deal.
 
 ## 📺 Screens
 
 | Screen | Description |
 | :--- | :--- |
-| **Home** | Central dashboard with quick metrics and entry points for both personas. |
-| **Organiser** | Create event listings, define sponsorship tiers, and manage incoming leads. |
-| **Sponsor** | Browse the event catalogue with powerful filters (City, Type, Size) and send offers. |
-| **Deal** | Dedicated space for negotiation, status tracking (Pending/Accepted/Declined), and shared notes. |
-| **Admin** | Oversight view to approve new listings, flag spam, and monitor platform activity. |
+| **Home** | Role-aware landing — sign in as organiser or sponsor. |
+| **My events** *(organiser)* | Create / edit / publish events, define per-event sponsorship tiers, upload venue photos and decks, copy a shareable link. |
+| **Inbox** *(organiser)* | All offers across your events, sorted newest first. |
+| **Browse** *(sponsor)* | Filter published events by city, type, and audience size. |
+| **My offers** *(sponsor)* | Track every offer you've sent and its status. |
+| **Deal** | Per-offer view: accept / decline, in-app message thread, attach logos / briefs / decks. |
+| **Admin** | Lightweight oversight (Phase 2 will add verification + payouts). |
+| **/event?slug=…** | Public, shareable event page — no login required to view. |
 
 ## 🛠️ Setup
 
-This project uses `uv` for extremely fast, reliable Python dependency management.
+This project uses [`uv`](https://github.com/astral-sh/uv) for fast, reliable Python dependency management.
 
 ### 1. Install uv
+
 **Windows:**
 ```powershell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -26,51 +30,80 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### 2. Initialise and Run
-```bash
-# Sync dependencies and create virtual environment
-uv sync
+### 2. Run in DEMO mode (zero config)
 
-# Launch the Streamlit application
+```bash
+uv sync
 uv run streamlit run app.py
 ```
+
+Sign in with any email; the verification code is `000000`. All data is in-memory and resets on restart.
+
+### 3. Run in LIVE mode (Supabase + Resend)
+
+1. Create a Supabase project, run [`migrations/001_init.sql`](./migrations/001_init.sql) in the SQL editor, and create a private Storage bucket called `assets`.
+2. Sign up for [Resend](https://resend.com) and verify a sending domain.
+3. Copy `.env.example` → `.env` and fill in `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`.
+4. `uv run streamlit run app.py` — the app auto-detects live mode when env vars are present.
+
+WhatsApp notifications via Twilio are optional; see `.env.example`.
+
+### 4. Deploy to Fly.io
+
+See [`flyio.md`](./flyio.md) for the full walkthrough.
 
 ## 📂 Project Structure
 
 ```text
-market-place/
-├── .venv/          # Managed by uv
-├── app.py          # Core Streamlit application logic & UI
-├── pyproject.toml  # Dependency definitions
-├── uv.lock         # Deterministic lockfile
-├── .gitignore      # Python/Streamlit specific ignore rules
-└── README.md       # Project documentation
+event-market/
+├── app.py              # Main Streamlit app (role-based nav)
+├── auth.py             # Email-OTP sign-in (Supabase or demo)
+├── db.py               # Data-access layer with demo-mode fallback
+├── notifications.py    # Resend email + Twilio WhatsApp wrappers
+├── storage.py          # Supabase Storage uploads
+├── theme.py            # Shared CSS / header / status badges
+├── pages/
+│   └── 1_event.py      # Public event page (/event?slug=…)
+├── migrations/
+│   └── 001_init.sql    # Postgres schema with RLS
+├── Dockerfile          # Python 3.12 + uv + Streamlit
+├── fly.toml            # Fly.io config (London, scale-to-zero)
+├── flyio.md            # Deployment walkthrough
+├── .env.example        # All required + optional env vars
+└── pyproject.toml      # uv-managed dependencies
 ```
 
 ## ⚡ Tech Stack
 
-- **Framework**: [Streamlit](https://streamlit.io/) (Rapid UI development)
-- **State Management**: `st.session_state` (In-memory persistence)
-- **Styling**: Custom Vanilla CSS (Dark mode, radial gradients, glassmorphism)
-- **Tooling**: [uv](https://github.com/astral-sh/uv) (Package management)
+- **Framework**: [Streamlit](https://streamlit.io/)
+- **Database / Auth / Storage**: [Supabase](https://supabase.com) (Postgres + Auth + Storage)
+- **Email**: [Resend](https://resend.com)
+- **WhatsApp**: [Twilio](https://www.twilio.com) *(optional)*
+- **Hosting**: [Fly.io](https://fly.io) (London region, scale-to-zero)
+- **Tooling**: [uv](https://github.com/astral-sh/uv)
+- **Styling**: Custom dark-mode CSS (radial gradients, glassmorphism)
 
 ## 🔄 Demo Flow
 
-1. **Organiser**: Start in the **Organiser** tab. Fill in event details for "Afro Vibes Night" and click **Save**. Navigate to **Add Packages** to activate the Bronze, Silver, and Gold tiers.
-2. **Sponsor**: Switch to the **Sponsor** tab. Use the filters to find events in "Glasgow". Select "Afro Vibes Night" and click **Send Offer** for the Silver package.
-3. **Deal**: Go to the **Deal** view. You will see the incoming offer from "Pulse Drinks". Click **✅ Accept Deal** to confirm the sponsorship.
-4. **Admin**: Head to the **Admin** tab to see the platform-wide activity, including the newly approved event and the closed deal metrics.
+1. **Organiser**: Sign in as organiser. Create an event in **My events**, add Bronze / Silver / Gold packages, upload a venue photo, click **Save & publish**. Copy the share link.
+2. **Sponsor** (in another browser tab, or after signing out): Open the share link. View packages and submit an offer.
+3. **Organiser**: Open **Inbox**, accept the offer. Reply in the in-app message thread.
+4. **Sponsor**: Reply. Attach a logo. Both sides see the conversation and files (refresh required — Supabase Realtime is Phase 2).
 
 ## 💎 Sponsorship Packages
 
-| Tier | Price | Benefits |
+Packages are defined **per event** by the organiser — no fixed tiers. The defaults that ship in the demo are aligned with what most grassroots organisers expect:
+
+| Tier | Typical Price | Typical Benefits |
 | :--- | :--- | :--- |
 | **Bronze** | £250 | Logo on flyer • 1 IG story mention |
 | **Silver** | £500 | Logo on flyer • MC shoutout • 1 post tag |
-| **Gold** | £1000 | Booth • Content bundle • Headline mention |
-| **Custom** | £750 | Custom deliverables (tailored as agreed) |
+| **Gold** | £1,000 | Booth • content bundle • headline mention |
+| **Custom** | varies | Tailored deliverables |
 
 ## ⚠️ Notes
 
-- **In-Memory State**: This prototype uses Streamlit's session state. All data (created events, sent offers, deal statuses) will reset if the browser page is refreshed or the server is restarted.
-- **Reference**: The UI aesthetics and functional flow are based on the original [event-sponsor-marketplace-clickable-prototype (2).html](file:///h:/code/yl/market-place/event-sponsor-marketplace-clickable-prototype%20(2).html).
+- **Demo mode is in-memory** — restarting the server wipes everything. Use it for local exploration only.
+- **Live mode requires Supabase** — once `SUPABASE_URL` and `SUPABASE_ANON_KEY` are set, the app switches automatically and persists everything to Postgres with row-level security.
+- **`/e/{slug}` paths** — true path-based slug routing isn't possible in pure Streamlit. The shareable URL pattern is `/event?slug=<slug>`. A reverse-proxy rewrite is a Phase-2 nginx-sidecar job.
+- **Reference**: UI aesthetics and flow are based on the original [`event-sponsor-marketplace-clickable-prototype (2).html`](./event-sponsor-marketplace-clickable-prototype%20(2).html).
