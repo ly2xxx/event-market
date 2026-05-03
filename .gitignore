@@ -61,3 +61,6 @@ coverage.xml
 # Project specific
 *.html
 !event-sponsor-marketplace-clickable-prototype (2).html
+
+# Local env (real secrets)
+.env

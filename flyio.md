@@ -61,17 +61,60 @@ flyctl logs
 
 You should see `You can now view your Streamlit app in your browser.` Click around the live app — if a button click reflects in the UI, the WebSocket is fine.
 
-## 5. Secrets (when you reach the Supabase step)
+## 5. Secrets (Phase 1: Supabase + Resend + optional Twilio)
 
-Never commit Supabase keys. Set them as Fly secrets — they become env vars at runtime:
+The app boots in DEMO mode without any secrets — useful for the very first
+deploy. To turn it LIVE, set the secrets below. They become env vars at runtime
+and trigger an automatic redeploy.
+
+### 5a. Supabase (required for live mode)
+
+1. Create a project at https://supabase.com (free tier).
+2. Open the SQL editor and paste the contents of `migrations/001_init.sql`. Run it.
+3. In Storage, create a private bucket called `assets`.
+4. From Project Settings → API, copy `URL`, `anon public`, and `service_role`.
+5. Set the secrets:
+   ```bash
+   flyctl secrets set \
+     SUPABASE_URL="https://xxx.supabase.co" \
+     SUPABASE_ANON_KEY="eyJ..." \
+     SUPABASE_SERVICE_KEY="eyJ..."
+   ```
+
+### 5b. Resend (email — required for notifications)
+
+1. Sign up at https://resend.com, verify your sending domain.
+2. Create an API key.
+3. Set:
+   ```bash
+   flyctl secrets set \
+     RESEND_API_KEY="re_..." \
+     NOTIFICATIONS_FROM_EMAIL="marketplace@yourdomain.com"
+   ```
+
+### 5c. Twilio WhatsApp (optional)
+
+Use the Twilio sandbox for now — both sender and recipients must opt in to
+the sandbox number. For production you'll need a WhatsApp Business sender,
+which takes ~1 week of approval.
 
 ```bash
-flyctl secrets set SUPABASE_URL="https://xxx.supabase.co" \
-                   SUPABASE_ANON_KEY="eyJ..." \
-                   SUPABASE_SERVICE_KEY="eyJ..."
+flyctl secrets set \
+  TWILIO_ACCOUNT_SID="AC..." \
+  TWILIO_AUTH_TOKEN="..." \
+  TWILIO_WHATSAPP_FROM="whatsapp:+14155238886"
 ```
 
-This triggers an automatic redeploy. Read in Python with `os.environ["SUPABASE_URL"]`.
+### 5d. Public base URL (used in notification deep-links)
+
+```bash
+flyctl secrets set PUBLIC_BASE_URL="https://<your-app>.fly.dev"
+```
+
+Verify which secrets are set:
+```bash
+flyctl secrets list
+```
 
 ## 6. Custom domain (optional, do later)
 

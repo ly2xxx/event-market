@@ -1,10 +1,15 @@
 [project]
 name = "event-sponsor-marketplace"
-version = "0.1.0"
-description = "Event Sponsor Marketplace - Streamlit MVP demo"
+version = "0.2.0"
+description = "Event Sponsor Marketplace - Streamlit app backed by Supabase"
 requires-python = ">=3.10"
 dependencies = [
     "streamlit>=1.35.0",
+    "supabase>=2.7.0",
+    "resend>=2.0.0",
+    "twilio>=9.2.0",
+    "python-slugify>=8.0.4",
+    "python-dotenv>=1.0.1",
 ]
 
 [tool.uv]
