@@ -1,0 +1,76 @@
+# Event Sponsor Marketplace — Streamlit MVP
+
+A streamlined marketplace designed to connect event organisers with brand sponsors, replacing the fragmented "WhatsApp and IG DM chaos" with a structured, professional platform. This MVP provides an end-to-end clickable journey from listing an event to closing a sponsorship deal.
+
+## 📺 Screens
+
+| Screen | Description |
+| :--- | :--- |
+| **Home** | Central dashboard with quick metrics and entry points for both personas. |
+| **Organiser** | Create event listings, define sponsorship tiers, and manage incoming leads. |
+| **Sponsor** | Browse the event catalogue with powerful filters (City, Type, Size) and send offers. |
+| **Deal** | Dedicated space for negotiation, status tracking (Pending/Accepted/Declined), and shared notes. |
+| **Admin** | Oversight view to approve new listings, flag spam, and monitor platform activity. |
+
+## 🛠️ Setup
+
+This project uses `uv` for extremely fast, reliable Python dependency management.
+
+### 1. Install uv
+**Windows:**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+**macOS / Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 2. Initialise and Run
+```bash
+# Sync dependencies and create virtual environment
+uv sync
+
+# Launch the Streamlit application
+uv run streamlit run app.py
+```
+
+## 📂 Project Structure
+
+```text
+market-place/
+├── .venv/          # Managed by uv
+├── app.py          # Core Streamlit application logic & UI
+├── pyproject.toml  # Dependency definitions
+├── uv.lock         # Deterministic lockfile
+├── .gitignore      # Python/Streamlit specific ignore rules
+└── README.md       # Project documentation
+```
+
+## ⚡ Tech Stack
+
+- **Framework**: [Streamlit](https://streamlit.io/) (Rapid UI development)
+- **State Management**: `st.session_state` (In-memory persistence)
+- **Styling**: Custom Vanilla CSS (Dark mode, radial gradients, glassmorphism)
+- **Tooling**: [uv](https://github.com/astral-sh/uv) (Package management)
+
+## 🔄 Demo Flow
+
+1. **Organiser**: Start in the **Organiser** tab. Fill in event details for "Afro Vibes Night" and click **Save**. Navigate to **Add Packages** to activate the Bronze, Silver, and Gold tiers.
+2. **Sponsor**: Switch to the **Sponsor** tab. Use the filters to find events in "Glasgow". Select "Afro Vibes Night" and click **Send Offer** for the Silver package.
+3. **Deal**: Go to the **Deal** view. You will see the incoming offer from "Pulse Drinks". Click **✅ Accept Deal** to confirm the sponsorship.
+4. **Admin**: Head to the **Admin** tab to see the platform-wide activity, including the newly approved event and the closed deal metrics.
+
+## 💎 Sponsorship Packages
+
+| Tier | Price | Benefits |
+| :--- | :--- | :--- |
+| **Bronze** | £250 | Logo on flyer • 1 IG story mention |
+| **Silver** | £500 | Logo on flyer • MC shoutout • 1 post tag |
+| **Gold** | £1000 | Booth • Content bundle • Headline mention |
+| **Custom** | £750 | Custom deliverables (tailored as agreed) |
+
+## ⚠️ Notes
+
+- **In-Memory State**: This prototype uses Streamlit's session state. All data (created events, sent offers, deal statuses) will reset if the browser page is refreshed or the server is restarted.
+- **Reference**: The UI aesthetics and functional flow are based on the original [event-sponsor-marketplace-clickable-prototype (2).html](file:///h:/code/yl/market-place/event-sponsor-marketplace-clickable-prototype%20(2).html).
