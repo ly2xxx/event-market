@@ -1,0 +1,10 @@
+.git
+.venv
+__pycache__
+*.pyc
+.streamlit
+.claude
+.env
+*.html
+README.md
+uv.lock.bak
