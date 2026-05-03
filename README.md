@@ -1,76 +1,72 @@
-# Event Sponsor Marketplace — Streamlit MVP
+# Next.js Port Guide
 
-A streamlined marketplace designed to connect event organisers with brand sponsors, replacing the fragmented "WhatsApp and IG DM chaos" with a structured, professional platform. This MVP provides an end-to-end clickable journey from listing an event to closing a sponsorship deal.
+Welcome to the Next.js version of your Event Sponsor Marketplace MVP!
 
-## 📺 Screens
+This guide is meant to help you transition from the mental model of **Python/Streamlit** into **JavaScript/React/Next.js**.
 
-| Screen | Description |
-| :--- | :--- |
-| **Home** | Central dashboard with quick metrics and entry points for both personas. |
-| **Organiser** | Create event listings, define sponsorship tiers, and manage incoming leads. |
-| **Sponsor** | Browse the event catalogue with powerful filters (City, Type, Size) and send offers. |
-| **Deal** | Dedicated space for negotiation, status tracking (Pending/Accepted/Declined), and shared notes. |
-| **Admin** | Oversight view to approve new listings, flag spam, and monitor platform activity. |
+## 1. The Architecture Shift
 
-## 🛠️ Setup
+### Streamlit: "Top-Down Execution"
+In Streamlit (`app.py`), every time a user clicks a button or types in an input, the **entire Python script re-runs from top to bottom**. Data that needs to persist across these re-runs must be explicitly saved into `st.session_state`. 
+It's incredibly fast to build, but it means the server is doing all the work, holding state in RAM.
 
-This project uses `uv` for extremely fast, reliable Python dependency management.
+### Next.js (React): "Component-Based State"
+Next.js uses **React**. In React, the UI is broken down into modular pieces (Components). When a user clicks a button, only the specific Component that holds that piece of data (State) re-renders, while the rest of the page stays exactly as it is.
+The heavy lifting is pushed to the user's browser, which is much more efficient.
 
-### 1. Install uv
-**Windows:**
-```powershell
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+## 2. State Management: `st.session_state` vs `useState`
+
+In your Streamlit MVP, you used:
+```python
+# Streamlit
+if "event" not in st.session_state:
+    st.session_state.event = {"name": "Afro Vibes Night"}
+
+# Updating state
+st.session_state.event["name"] = "New Name"
 ```
-**macOS / Linux:**
+
+In the Next.js app (`app/page.tsx`), we use the `useState` hook from React:
+```tsx
+// React
+import { useState } from "react";
+
+const [event, setEvent] = useState({ name: "Afro Vibes Night" });
+
+// Updating state (we must replace the whole object)
+setEvent({ ...event, name: "New Name" });
+```
+When `setEvent` is called, React knows exactly which parts of the UI depend on `event` and updates *only* those HTML elements instantly.
+
+## 3. Developing Locally
+
+To run this Next.js app locally:
+1. Make sure you have Node.js installed on your machine.
+2. In the project folder, open your terminal (PowerShell) and run:
+   ```bash
+   npm run dev
+   ```
+3. Open `http://localhost:3000` in your browser. Any changes you make to `app/page.tsx` or `app/globals.css` will hot-reload instantly.
+
+## 4. Deploying to Vercel (Free)
+
+Vercel is the creator of Next.js and the absolute best place to host it. It is entirely free for side projects.
+
+**Step 1: Push to GitHub**
+Your code must be in a GitHub repository.
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+git add .
+git commit -m "Initial Next.js Port"
+git push origin main
 ```
 
-### 2. Initialise and Run
-```bash
-# Sync dependencies and create virtual environment
-uv sync
+**Step 2: Deploy**
+1. Go to [vercel.com](https://vercel.com) and create an account using your GitHub.
+2. Click **Add New... -> Project**.
+3. Import the repository you just pushed to GitHub.
+4. Leave all settings exactly as they are (Vercel automatically detects Next.js) and click **Deploy**.
 
-# Launch the Streamlit application
-uv run streamlit run app.py
-```
+Within 30 seconds, your app will be live on a global Edge network with a free SSL certificate and `.vercel.app` domain. Any future pushes to your GitHub `main` branch will automatically trigger a new deployment.
 
-## 📂 Project Structure
-
-```text
-market-place/
-├── .venv/          # Managed by uv
-├── app.py          # Core Streamlit application logic & UI
-├── pyproject.toml  # Dependency definitions
-├── uv.lock         # Deterministic lockfile
-├── .gitignore      # Python/Streamlit specific ignore rules
-└── README.md       # Project documentation
-```
-
-## ⚡ Tech Stack
-
-- **Framework**: [Streamlit](https://streamlit.io/) (Rapid UI development)
-- **State Management**: `st.session_state` (In-memory persistence)
-- **Styling**: Custom Vanilla CSS (Dark mode, radial gradients, glassmorphism)
-- **Tooling**: [uv](https://github.com/astral-sh/uv) (Package management)
-
-## 🔄 Demo Flow
-
-1. **Organiser**: Start in the **Organiser** tab. Fill in event details for "Afro Vibes Night" and click **Save**. Navigate to **Add Packages** to activate the Bronze, Silver, and Gold tiers.
-2. **Sponsor**: Switch to the **Sponsor** tab. Use the filters to find events in "Glasgow". Select "Afro Vibes Night" and click **Send Offer** for the Silver package.
-3. **Deal**: Go to the **Deal** view. You will see the incoming offer from "Pulse Drinks". Click **✅ Accept Deal** to confirm the sponsorship.
-4. **Admin**: Head to the **Admin** tab to see the platform-wide activity, including the newly approved event and the closed deal metrics.
-
-## 💎 Sponsorship Packages
-
-| Tier | Price | Benefits |
-| :--- | :--- | :--- |
-| **Bronze** | £250 | Logo on flyer • 1 IG story mention |
-| **Silver** | £500 | Logo on flyer • MC shoutout • 1 post tag |
-| **Gold** | £1000 | Booth • Content bundle • Headline mention |
-| **Custom** | £750 | Custom deliverables (tailored as agreed) |
-
-## ⚠️ Notes
-
-- **In-Memory State**: This prototype uses Streamlit's session state. All data (created events, sent offers, deal statuses) will reset if the browser page is refreshed or the server is restarted.
-- **Reference**: The UI aesthetics and functional flow are based on the original [event-sponsor-marketplace-clickable-prototype (2).html](file:///h:/code/yl/market-place/event-sponsor-marketplace-clickable-prototype%20(2).html).
+## Next Steps for the Future
+This port currently mimics the "in-memory" state of the Streamlit MVP (refreshing the page resets the data). When you are ready to make it a "real" application, you will integrate **Supabase** directly into Next.js using the `@supabase/ssr` package. This will allow you to read and write directly to a real database from your frontend components safely and efficiently.
