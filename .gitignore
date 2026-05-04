@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ is a Next.js source directory — only ignore Python venv copies under .venv/
 lib64/
 parts/
 sdist/
